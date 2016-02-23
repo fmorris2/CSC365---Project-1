@@ -16,7 +16,7 @@ public class CustomUrl
 	{
 		if(!url.contains("www."))
 			url = "www." + url;
-		if(!url.contains("http://"))
+		if(!url.contains("http"))
 			url = "http://" + url;
 		
 		return url;
