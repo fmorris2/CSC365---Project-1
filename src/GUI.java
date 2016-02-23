@@ -1,4 +1,6 @@
 import java.awt.EventQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -8,8 +10,14 @@ public class GUI extends javax.swing.JFrame
 {
 	private static final long serialVersionUID = 6060077846877793065L;
 	
+	private Corpus corpus;
+	private List<CustomUrl> potentialUrls;
+	private CustomUrl primaryUrl;
+	
 	public GUI() 
     {
+		this.corpus = new Corpus();
+		this.potentialUrls = new ArrayList<>();
         initComponents();
     }
                        
@@ -127,8 +135,58 @@ public class GUI extends javax.swing.JFrame
 
     private void calculateButtonActionPerformed(java.awt.event.ActionEvent evt) 
     {                                                
-        // TODO add your handling code here:
-    }                                               
+    	try
+    	{
+    		parseInfo();
+    		addWords();
+    		calculateTfIdf();
+    	}
+    	catch(Exception e)
+    	{
+    		e.printStackTrace();
+    	}
+    }
+    
+    private void calculateTfIdf()
+    {
+    	for(CustomUrl url : corpus)
+    		url.getFreqTable().calculate();
+    }
+    
+    private void addWords()
+    {
+    	for(CustomUrl url : corpus)
+    	{
+    		System.out.println("Adding words from url: " + url.getUrl());
+    		String body = Utils.getWebPageBody(url.getUrl());
+    		String[] bodyParts = body != null ? body.split(" ") : null;
+    		
+    		if(bodyParts == null)
+    			continue;
+    		for(String s : bodyParts)
+    		{
+    			if(s.length() == 0)
+    				continue;
+    			
+    			url.getFreqTable().addWord(s);
+    		}
+    	}
+    }
+    
+    private void parseInfo()
+    {
+    	primaryUrl = new CustomUrl(primaryTextBox.getText(), corpus);
+		
+		//Parse potential urls
+		for (String line : potentialTextArea.getText().split("\\n"))
+		{
+			line = line.trim();
+			if(!line.isEmpty())
+			{
+ 				potentialUrls.add(new CustomUrl(line, corpus));
+			}
+		}
+    }
     
     public static void main(String args[]) 
     {
