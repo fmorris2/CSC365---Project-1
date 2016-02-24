@@ -14,7 +14,7 @@ public class CustomUrl
 	
 	private String fixInput(String url)
 	{
-		if(!url.contains("www."))
+		if(!url.contains("www.") && !url.contains("http"))
 			url = "www." + url;
 		if(!url.contains("http"))
 			url = "http://" + url;

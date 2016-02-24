@@ -137,11 +137,12 @@ public class GUI extends javax.swing.JFrame
     {                                                
     	try
     	{
+    		corpus.clear();
     		parseInfo();
     		addWords();
     		calculateTfIdf();
-    		System.out.println("Cosine Similarity: " + 
-    				FrequencyTable.calculateAngle(primaryUrl.getFreqTable(), primaryUrl.getFreqTable()));
+    		CustomUrl closest = corpus.getClosestRelated(primaryUrl);
+    		System.out.println(closest.getUrl() + " is most closely related with " + primaryUrl.getUrl());
     	}
     	catch(Exception e)
     	{

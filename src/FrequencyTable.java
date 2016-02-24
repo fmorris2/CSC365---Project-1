@@ -38,9 +38,7 @@ public class FrequencyTable extends Hashtable<String, Double>
 	public static double calculateAngle(FrequencyTable one, FrequencyTable two)
 	{
 		double dotProduct = dotProduct(one, two);
-		System.out.println("Dot product: " + dotProduct);
 		double magnitudeOne = one.magnitude();
-		System.out.println("Magnitude: " + magnitudeOne);
 		double magnitudeTwo = two.magnitude();
 		
 		return dotProduct / (magnitudeOne * magnitudeTwo);
@@ -58,10 +56,8 @@ public class FrequencyTable extends Hashtable<String, Double>
 		//iterate through words
 		for(String word : mergedKeySet)
 		{
-			System.out.println("Word: " + word);
 			Double valOne = one.get(word);
 			Double valTwo = two.get(word);
-			System.out.println("valOne: " + valOne + ", valTwo: " + valTwo);
 			
 			sum += (valOne == null ? 0 : valOne) * (valTwo == null ? 0 : valTwo);
 		}
@@ -76,16 +72,11 @@ public class FrequencyTable extends Hashtable<String, Double>
 	
 	private double calculateTfIdf(String word)
 	{
-		System.out.println("Calculate TfIdf for word: " + word);
-		System.out.println("Term freq: " + calculateTermFreq(word));
-		System.out.println("Inverse doc freq: " + calculateInverseDocFreq(word));
 		return calculateTermFreq(word) * calculateInverseDocFreq(word);
 	}
 	
 	private double calculateInverseDocFreq(String word)
 	{
-		System.out.println("Corpus size: " + corpus.size());
-		System.out.println("1 + docsContainingTerm: " + (1 + corpus.getTotalDocsContainingTerm(word)));
 		return Math.log((double)corpus.size() / (1 + corpus.getTotalDocsContainingTerm(word)));
 	}
 	
