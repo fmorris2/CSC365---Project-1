@@ -5,6 +5,8 @@ public class Corpus extends ArrayList<CustomUrl>
 {
 	private static final long serialVersionUID = -5811919797076472772L;
 	
+	private CustomUrl primaryUrl;
+	
 	public int getTotalDocsContainingTerm(String term)
 	{
 		int total = 0;
@@ -14,5 +16,15 @@ public class Corpus extends ArrayList<CustomUrl>
 				total++;
 		
 		return total;
+	}
+	
+	public void setPrimaryUrl(CustomUrl url)
+	{
+		primaryUrl = url;
+	}
+	
+	public CustomUrl getPrimaryUrl()
+	{
+		return primaryUrl;
 	}
 }

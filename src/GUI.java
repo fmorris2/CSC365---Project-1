@@ -140,6 +140,8 @@ public class GUI extends javax.swing.JFrame
     		parseInfo();
     		addWords();
     		calculateTfIdf();
+    		System.out.println("Cosine Similarity: " + 
+    				FrequencyTable.calculateAngle(primaryUrl.getFreqTable(), primaryUrl.getFreqTable()));
     	}
     	catch(Exception e)
     	{
@@ -176,6 +178,7 @@ public class GUI extends javax.swing.JFrame
     private void parseInfo()
     {
     	primaryUrl = new CustomUrl(primaryTextBox.getText(), corpus);
+    	corpus.setPrimaryUrl(primaryUrl);
 		
 		//Parse potential urls
 		for (String line : potentialTextArea.getText().split("\\n"))
