@@ -6,7 +6,6 @@ public class CustomUrl
 	
 	public CustomUrl(String url, Corpus corpus)
 	{
-		
 		this.url = fixInput(url);
 		this.freqTable = new FrequencyTable(corpus);
 		corpus.add(this);

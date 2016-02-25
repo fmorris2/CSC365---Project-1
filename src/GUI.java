@@ -13,6 +13,7 @@ public class GUI extends javax.swing.JFrame
 	private Corpus corpus;
 	private List<CustomUrl> potentialUrls;
 	private CustomUrl primaryUrl;
+	private CustomUrl closestUrl;
 	
 	public GUI() 
     {
@@ -21,8 +22,8 @@ public class GUI extends javax.swing.JFrame
         initComponents();
     }
                        
-    private void initComponents() 
-    {
+	private void initComponents() 
+	{
         titleLabel = new javax.swing.JLabel();
         authorLabel = new javax.swing.JLabel();
         mainPanel = new javax.swing.JPanel();
@@ -32,6 +33,7 @@ public class GUI extends javax.swing.JFrame
         potentialLabel = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         potentialTextArea = new javax.swing.JTextArea();
+        closestLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("CSC 365 - Project #1");
@@ -65,27 +67,32 @@ public class GUI extends javax.swing.JFrame
         potentialTextArea.setRows(5);
         jScrollPane1.setViewportView(potentialTextArea);
 
+        closestLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        closestLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        closestLabel.setText("Closest:");
+
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
         mainPanelLayout.setHorizontalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
-                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainPanelLayout.createSequentialGroup()
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(mainPanelLayout.createSequentialGroup()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addGap(172, 172, 172)
-                                .addComponent(calculateButton))
                             .addGroup(mainPanelLayout.createSequentialGroup()
                                 .addGap(168, 168, 168)
                                 .addComponent(primaryLabel))
                             .addGroup(mainPanelLayout.createSequentialGroup()
                                 .addGap(133, 133, 133)
-                                .addComponent(potentialLabel)))
+                                .addComponent(potentialLabel))
+                            .addGroup(mainPanelLayout.createSequentialGroup()
+                                .addGap(171, 171, 171)
+                                .addComponent(calculateButton)))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, mainPanelLayout.createSequentialGroup()
+                    .addGroup(mainPanelLayout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(closestLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(primaryTextBox))))
                 .addContainerGap())
@@ -101,7 +108,9 @@ public class GUI extends javax.swing.JFrame
                 .addComponent(primaryLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(primaryTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addGap(27, 27, 27)
+                .addComponent(closestLabel)
+                .addGap(27, 27, 27)
                 .addComponent(calculateButton)
                 .addContainerGap())
         );
@@ -131,18 +140,21 @@ public class GUI extends javax.swing.JFrame
         );
 
         pack();
-    }                    
+    }              
 
     private void calculateButtonActionPerformed(java.awt.event.ActionEvent evt) 
     {                                                
     	try
     	{
+    		closestLabel.setText("Closest: ");
     		corpus.clear();
+    		potentialUrls.clear();
     		parseInfo();
     		addWords();
     		calculateTfIdf();
-    		CustomUrl closest = corpus.getClosestRelated(primaryUrl);
-    		System.out.println(closest.getUrl() + " is most closely related with " + primaryUrl.getUrl());
+    		closestUrl = corpus.getClosestRelated(primaryUrl);
+    		closestLabel.setText("Closest: " + closestUrl.getUrl());
+    		System.out.println(closestUrl.getUrl() + " is most closely related with " + primaryUrl.getUrl());
     	}
     	catch(Exception e)
     	{
@@ -160,18 +172,25 @@ public class GUI extends javax.swing.JFrame
     {
     	for(CustomUrl url : corpus)
     	{
-    		System.out.println("Adding words from url: " + url.getUrl());
-    		String body = Utils.getWebPageBody(url.getUrl());
-    		String[] bodyParts = body != null ? body.split(" ") : null;
-    		
-    		if(bodyParts == null)
-    			continue;
-    		for(String s : bodyParts)
+    		try
     		{
-    			if(s.length() == 0)
-    				continue;
-    			
-    			url.getFreqTable().addWord(s);
+	    		System.out.println("Adding words from url: " + url.getUrl());
+	    		String body = Utils.getWebPageBody(url.getUrl());
+	    		String[] bodyParts = body != null ? body.split(" ") : null;
+	    		
+	    		if(bodyParts == null)
+	    			continue;
+	    		for(String s : bodyParts)
+	    		{
+	    			if(s.length() == 0)
+	    				continue;
+	    			
+	    			url.getFreqTable().addWord(s);
+	    		}
+    		}
+    		catch(Exception e)
+    		{
+    			e.printStackTrace();
     		}
     	}
     }
@@ -205,11 +224,12 @@ public class GUI extends javax.swing.JFrame
                    
     private javax.swing.JLabel authorLabel;
     private javax.swing.JButton calculateButton;
+    private javax.swing.JLabel closestLabel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JLabel potentialLabel;
     private javax.swing.JTextArea potentialTextArea;
     private javax.swing.JLabel primaryLabel;
     private javax.swing.JTextField primaryTextBox;
-    private javax.swing.JLabel titleLabel;                  
+    private javax.swing.JLabel titleLabel;            
 }
