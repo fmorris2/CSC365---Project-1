@@ -36,7 +36,6 @@ public class CustomHashTable<K, V>
 		//compute hash / index and put in appropriate bucket
 		int index = computeIndex(key);
 		buckets.add(index, new BucketEntry<K, V>(key, value));
-		System.out.println("Computed index for key: " + key + " - " + index);
 	}
 	
 	public Set<K> keySet()
@@ -55,8 +54,7 @@ public class CustomHashTable<K, V>
 	
 	private int computeIndex(K key)
 	{
-		System.out.println("Size: " + buckets.size());
-		return Math.abs(computeHash(key) % (buckets.size() + 1));
+		return buckets.size() == 0 ? 0 : Math.abs(computeHash(key) % buckets.size());
 	}
 	
 	private int computeHash(K key)

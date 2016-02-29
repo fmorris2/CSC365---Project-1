@@ -146,7 +146,6 @@ public class GUI extends javax.swing.JFrame
     {                                                
     	try
     	{
-    		closestLabel.setText("Closest: ");
     		corpus.clear();
     		potentialUrls.clear();
     		parseInfo();

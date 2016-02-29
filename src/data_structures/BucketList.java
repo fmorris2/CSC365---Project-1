@@ -1,6 +1,5 @@
 package data_structures;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class BucketList<K, V> extends LinkedList<Bucket<K, V>>
@@ -10,31 +9,31 @@ public class BucketList<K, V> extends LinkedList<Bucket<K, V>>
 	private final int NUM_BUCKETS = 173; //Arbitrary prime number
 	
 	public BucketList()
-	{
-		
+	{	
+		initializeBuckets();
 	}
 	
 	public void add(int index, BucketEntry<K, V> entry)
 	{
-		if(index >= size())
-			fillUpToBucket(index, entry);
-		else
-			addToExistingBucket(index, entry);
-	}
-	
-	private void fillUpToBucket(int index, BucketEntry<K, V> entry)
-	{
-		for(int i = size(); i <= index; i++)
-			add(null);
+		Bucket<K, V> bucket = get(index);
 		
-		add(new Bucket<>(entry));
-	}
-	
-	private void addToExistingBucket(int index, BucketEntry<K, V> entry)
-	{
-		if(get(index) == null)
+		if(bucket == null)
 			set(index, new Bucket<>(entry));
 		else
-			get(index).add(entry);
+		{
+			//replace is necessary
+			BucketEntry<K, V> current = bucket.findEntry(entry.getKey());
+			
+			if(current != null)
+				current.setValue(entry.getValue());
+			else
+				bucket.add(entry);
+		}
+	}
+	
+	private void initializeBuckets()
+	{
+		for(int i = 0; i < NUM_BUCKETS; i++)
+			add(null);
 	}
 }

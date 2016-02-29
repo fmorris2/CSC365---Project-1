@@ -20,4 +20,9 @@ public class BucketEntry<K, V>
 	{
 		return value;
 	}
+	
+	public void setValue(V val)
+	{
+		value = val;
+	}
 }
