@@ -1,6 +1,7 @@
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
+
+import data_structures.CustomHashTable;
 
 /*
  * Each URL given by the user will have an instance of this Object assigned to it.
@@ -9,18 +10,16 @@ import java.util.Set;
  * hence the String being the key (representing the word), and a Double being the value
  * (representing the TF-IDF value)
  */
-public class FrequencyTable extends Hashtable<String, Double>
+public class FrequencyTable extends CustomHashTable<String, Double>
 {
-	private static final long serialVersionUID = -9097372443547729620L;
-	
 	private int maxRawFrequency;
 	private Corpus corpus;
-	private Hashtable<String, Integer> rawFreqTable;
+	private CustomHashTable<String, Integer> rawFreqTable;
 	
 	public FrequencyTable(Corpus corpus)
 	{
 		this.corpus = corpus;
-		rawFreqTable = new Hashtable<>();
+		rawFreqTable = new CustomHashTable<>();
 	}
 	
 	public void addWord(String word)
@@ -90,7 +89,7 @@ public class FrequencyTable extends Hashtable<String, Double>
 		return 0.5 + (0.5 * (rawFreq / maxRawFrequency));
 	}
 	
-	public Hashtable<String, Integer> getRawFreqTable()
+	public CustomHashTable<String, Integer> getRawFreqTable()
 	{
 		return rawFreqTable;
 	}
