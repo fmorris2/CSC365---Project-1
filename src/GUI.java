@@ -146,11 +146,22 @@ public class GUI extends javax.swing.JFrame
     {                                                
     	try
     	{
+    		//clear corpus from previous calculations
     		corpus.clear();
     		potentialUrls.clear();
+    		
+    		//parse GUI info
     		parseInfo();
+    		
+    		//parse words from all of the web pages
+    		long time = System.currentTimeMillis();
     		addWords();
+    		System.out.println("It took " + (System.currentTimeMillis() - time) + "ms to parse the web pages");
+    		
+    		//calculate TF-IDF values for each word in each document
     		calculateTfIdf();
+    		
+    		//compare and find most closely related URL
     		closestUrl = corpus.getClosestRelated(primaryUrl);
     		closestLabel.setText("Closest: " + closestUrl.getUrl());
     		System.out.println(closestUrl.getUrl() + " is most closely related with " + primaryUrl.getUrl());
@@ -174,11 +185,16 @@ public class GUI extends javax.swing.JFrame
     		try
     		{
 	    		System.out.println("Adding words from url: " + url.getUrl());
+	    		
+	    		//parse body of web page with JSoup
 	    		String body = Utils.getWebPageBody(url.getUrl());
+	    		
+	    		//split by spaces
 	    		String[] bodyParts = body != null ? body.split(" ") : null;
 	    		
 	    		if(bodyParts == null)
 	    			continue;
+	    		
 	    		for(String s : bodyParts)
 	    		{
 	    			if(s.length() == 0)
@@ -204,9 +220,7 @@ public class GUI extends javax.swing.JFrame
 		{
 			line = line.trim();
 			if(!line.isEmpty())
-			{
  				potentialUrls.add(new CustomUrl(line, corpus));
-			}
 		}
     }
     

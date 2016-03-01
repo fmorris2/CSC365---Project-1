@@ -6,7 +6,7 @@ public class BucketList<K, V> extends LinkedList<Bucket<K, V>>
 {
 	private static final long serialVersionUID = 795688579905882920L;
 	
-	private final int NUM_BUCKETS = 173; //Arbitrary prime number
+	private final int NUM_BUCKETS = 173; //Arbitrary prime number - there is definitely  a better way to do this
 	
 	public BucketList()
 	{	
@@ -21,12 +21,12 @@ public class BucketList<K, V> extends LinkedList<Bucket<K, V>>
 			set(index, new Bucket<>(entry));
 		else
 		{
-			//replace is necessary
 			BucketEntry<K, V> current = bucket.findEntry(entry.getKey());
-			
+		
+			//if the key already exists, we update the existing entry with the new value
 			if(current != null)
 				current.setValue(entry.getValue());
-			else
+			else //otherwise we add the entry
 				bucket.add(entry);
 		}
 	}
