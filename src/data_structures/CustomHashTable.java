@@ -1,16 +1,15 @@
 package data_structures;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class CustomHashTable<K, V>
 {	
 	private BucketList<K, V> buckets;
-	private Set<K> keySet;
 	
 	public CustomHashTable()
 	{
-		keySet = new HashSet<>();
 		buckets = new BucketList<K, V>();
 	}
 	
@@ -29,23 +28,36 @@ public class CustomHashTable<K, V>
 	}
 	
 	public void put(K key, V value)
-	{
-		//add key to keySet
-		keySet.add(key);
-		
+	{		
 		//compute hash / index and put in appropriate bucket
 		int index = computeIndex(key);
 		buckets.add(index, new BucketEntry<K, V>(key, value));
 	}
-	
-	public Set<K> keySet()
-	{
-		return keySet;
-	}
-	
+
 	public boolean containsKey(K key)
 	{
-		return keySet.contains(key);
+		return get(key) != null;
+	}
+	
+	public List<K> keySet()
+	{
+		List<K> keys = new ArrayList<>();
+		
+		for(Bucket<K, V> bucket : buckets)
+		{
+			if(bucket == null)
+				continue;
+			
+			for(BucketEntry<K, V> entry : bucket.getEntries())
+			{
+				if(entry == null)
+					continue;
+				
+				keys.add(entry.getKey());
+			}
+		}
+		
+		return keys;
 	}
 	
 	/* END PUBLIC API */

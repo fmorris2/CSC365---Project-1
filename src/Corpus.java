@@ -12,7 +12,7 @@ public class Corpus extends ArrayList<CustomUrl>
 		int total = 0;
 		
 		for(CustomUrl url : this)
-			if(url.getFreqTable().getRawFreqTable().containsKey(term))
+			if(url.getFreqTable().containsKey(term))
 				total++;
 		
 		return total;

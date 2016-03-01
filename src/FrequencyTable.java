@@ -10,28 +10,34 @@ import data_structures.CustomHashTable;
  * hence the String being the key (representing the word), and a Double being the value
  * (representing the TF-IDF value)
  */
-public class FrequencyTable extends CustomHashTable<String, Double>
+public class FrequencyTable extends CustomHashTable<String, Word>
 {
 	private int maxRawFrequency;
 	private Corpus corpus;
-	private CustomHashTable<String, Integer> rawFreqTable;
 	
 	public FrequencyTable(Corpus corpus)
 	{
 		this.corpus = corpus;
-		rawFreqTable = new CustomHashTable<>();
 	}
 	
 	public void addWord(String word)
 	{
-		Integer currentCount = rawFreqTable.get(word);
-		rawFreqTable.put(word, currentCount == null ? 1 : currentCount + 1);
+		Word wordEntry = get(word);
+		
+		if(wordEntry == null)
+			put(word, new Word());
+		else
+			wordEntry.incrementRawFrequency();
 	}
 	
 	public void calculate()
 	{
-		for(String key : rawFreqTable.keySet())
-			this.put(key, calculateTfIdf(key));
+		for(String key : keySet())
+		{
+			Word word = get(key);
+			if(word != null)
+				word.setTfIdf(calculateTfIdf(key));
+		}
 	}
 	
 	public static double calculateAngle(FrequencyTable one, FrequencyTable two)
@@ -55,10 +61,13 @@ public class FrequencyTable extends CustomHashTable<String, Double>
 		//iterate through words
 		for(String word : mergedKeySet)
 		{
-			Double valOne = one.get(word);
-			Double valTwo = two.get(word);
+			Word first = one.get(word);
+			Word second = two.get(word);
 			
-			sum += (valOne == null ? 0 : valOne) * (valTwo == null ? 0 : valTwo);
+			double valOne = first == null ? 0 : first.getTfIdf();
+			double valTwo = second == null ? 0 : second.getTfIdf();
+			
+			sum += valOne * valTwo;
 		}
 		
 		return sum;
@@ -81,16 +90,13 @@ public class FrequencyTable extends CustomHashTable<String, Double>
 	
 	private double calculateTermFreq(String word)
 	{
-		int rawFreq = rawFreqTable.get(word);
+		Word wordEntry = get(word);
+		
+		int rawFreq = wordEntry == null ? 0 : wordEntry.getRawFrequency();
 		
 		if(rawFreq > maxRawFrequency)
 			maxRawFrequency = rawFreq;
 		
 		return 0.5 + (0.5 * (rawFreq / maxRawFrequency));
-	}
-	
-	public CustomHashTable<String, Integer> getRawFreqTable()
-	{
-		return rawFreqTable;
 	}
 }
