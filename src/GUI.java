@@ -1,6 +1,9 @@
-import java.awt.EventQueue;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  *
@@ -10,16 +13,13 @@ public class GUI extends javax.swing.JFrame
 {
 	private static final long serialVersionUID = 6060077846877793065L;
 	
-	private Corpus corpus;
-	private List<CustomUrl> potentialUrls;
-	private CustomUrl primaryUrl;
-	private CustomUrl closestUrl;
+	private Application application;
 	
-	public GUI() 
+	public GUI(Application application) 
     {
-		this.corpus = new Corpus();
-		this.potentialUrls = new ArrayList<>();
         initComponents();
+        addClosingListener();
+        this.application = application;
     }
                        
 	private void initComponents() 
@@ -140,99 +140,37 @@ public class GUI extends javax.swing.JFrame
         );
 
         pack();
-    }              
-
+    }
+	
+	public void addClosingListener()
+	{
+		addWindowListener(new WindowAdapter() 
+		{
+			  public void windowClosing(WindowEvent e) 
+			  {
+				  application.end();
+			  }
+		});
+	}
+	
     private void calculateButtonActionPerformed(java.awt.event.ActionEvent evt) 
     {                                                
-    	try
-    	{
-    		//clear corpus from previous calculations
-    		corpus.clear();
-    		potentialUrls.clear();
-    		
-    		//parse GUI info
-    		parseInfo();
-    		
-    		//parse words from all of the web pages
-    		long time = System.currentTimeMillis();
-    		addWords();
-    		System.out.println("It took " + (System.currentTimeMillis() - time) + "ms to parse the web pages");
-    		
-    		//calculate TF-IDF values for each word in each document
-    		calculateTfIdf();
-    		
-    		//compare and find most closely related URL
-    		closestUrl = corpus.getClosestRelated(primaryUrl);
-    		closestLabel.setText("Closest: " + closestUrl.getUrl());
-    		System.out.println(closestUrl.getUrl() + " is most closely related with " + primaryUrl.getUrl());
-    	}
-    	catch(Exception e)
-    	{
-    		e.printStackTrace();
-    	}
+    	application.execute();
     }
     
-    private void calculateTfIdf()
+    public JTextArea getPotentialTextArea()
     {
-    	for(CustomUrl url : corpus)
-    		url.getFreqTable().calculate();
+    	return potentialTextArea;
     }
     
-    private void addWords()
+    public JTextField getPrimaryTextBox()
     {
-    	for(CustomUrl url : corpus)
-    	{
-    		try
-    		{
-	    		System.out.println("Adding words from url: " + url.getUrl());
-	    		
-	    		//parse body of web page with JSoup
-	    		String body = Utils.getWebPageBody(url.getUrl());
-	    		
-	    		//split by spaces
-	    		String[] bodyParts = body != null ? body.split(" ") : null;
-	    		
-	    		if(bodyParts == null)
-	    			continue;
-	    		
-	    		for(String s : bodyParts)
-	    		{
-	    			if(s.length() == 0)
-	    				continue;
-	    			
-	    			url.getFreqTable().addWord(s);
-	    		}
-    		}
-    		catch(Exception e)
-    		{
-    			e.printStackTrace();
-    		}
-    	}
+    	return primaryTextBox;
     }
     
-    private void parseInfo()
+    public JLabel getClosestLabel()
     {
-    	primaryUrl = new CustomUrl(primaryTextBox.getText(), corpus);
-    	corpus.setPrimaryUrl(primaryUrl);
-		
-		//Parse potential urls
-		for (String line : potentialTextArea.getText().split("\\n"))
-		{
-			line = line.trim();
-			if(!line.isEmpty())
- 				potentialUrls.add(new CustomUrl(line, corpus));
-		}
-    }
-    
-    public static void main(String args[]) 
-    {
-        EventQueue.invokeLater(new Runnable() 
-        {
-            public void run() 
-            {
-                new GUI().setVisible(true);
-            }
-        });
+    	return closestLabel;
     }
                    
     private javax.swing.JLabel authorLabel;
