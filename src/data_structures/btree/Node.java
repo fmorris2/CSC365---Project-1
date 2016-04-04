@@ -42,6 +42,11 @@ public class Node
 		return keys;
 	}
 	
+	public void setKeys(Entry[] entries)
+	{
+		keys = entries;
+	}
+	
 	public Node[] getLinks()
 	{
 		return links;
@@ -69,25 +74,27 @@ public class Node
 	
 	public int addEntry(Entry e)
 	{
-		if(getNumKeys() == CustomBTree.DEGREE - 1)
-			return -1;
-		
+		return addEntry(keys, e);
+	}
+	
+	private int addEntry(Entry[] arr, Entry e)
+	{	
 		int index;
 		int comparison = 1;
 		
 		//Find appropriate index for the new entry
-		for(index = 0; index < keys.length - 1; index++)
+		for(index = 0; index < arr.length - 1; index++)
 		{
-			comparison = keys[index] == null ? -1 : e.compareTo(keys[index]);
+			comparison = arr[index] == null ? -1 : e.compareTo(arr[index]);
 			
 			//System.out.println("index: " + index);
-			if(keys[index] == null || comparison < 0)
+			if(arr[index] == null || comparison < 0)
 				break;
 		}
 		
-		if(keys[index] == null) //Just insert, no swap needed
+		if(arr[index] == null) //Just insert, no swap needed
 		{
-			keys[index] = e;
+			arr[index] = e;
 		}
 		else
 		{
@@ -95,20 +102,30 @@ public class Node
 			if(index == 0 || comparison <= 0)
 				shiftRight(index);
 			else
-				shiftLeft(index);
+				shiftLeft(index, 0);
 			
-			keys[index] = e;
+			arr[index] = e;
 		}
 		
 		return index;
 	}
 	
-	private void shiftLeft(int index)
+	public Entry[] getOverflow(Entry e)
+	{
+		Entry[] overflow = new Entry[CustomBTree.DEGREE];
+		for(int i = 0; i < keys.length; i++)
+			overflow[i] = keys[i];
+		
+		addEntry(overflow, e);
+		return overflow;
+	}
+	
+	public void shiftLeft(int index, int endIndex)
 	{
 		Entry temp = keys[index] == null ? null : new Entry(keys[index]);
 		keys[index] = null;
 		
-		for(int i = index - 1; i >= 0; i--)
+		for(int i = index - 1; i >= endIndex; i--)
 		{
 			Entry temp2 = keys[i] == null ? null : new Entry(keys[i]);
 			keys[i] = temp;

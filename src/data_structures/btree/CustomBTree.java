@@ -27,8 +27,8 @@ public class CustomBTree
 		
 		while(node != null && numKeys > 0)
 		{	
-			System.out.println("Not null");
-			System.out.println("Number of links: " + node.getNumLinks());
+			//System.out.println("Not null");
+			//System.out.println("Number of links: " + node.getNumLinks());
 			Entry[] keys = node.getKeys();
 			Node[] links = node.getLinks();
 			
@@ -37,28 +37,28 @@ public class CustomBTree
 				if(e == null)
 					continue;
 				
-				System.out.print(e.getKey() + " ");
+				//System.out.print(e.getKey() + " ");
 			}
 			
-			System.out.println();
+			//System.out.println();
 			
 			for(int i = 0; i < numKeys; i++)
 			{
 				boolean isLess = isLess(key, keys[i].getKey());
 				boolean isGreater = isGreater(key, keys[i].getKey());
-				System.out.println("Comparing " + keys[i].getKey() + " to " + key);
+				//System.out.println("Comparing " + keys[i].getKey() + " to " + key);
 				if(keys[i].getKey().equals(key))
 					return keys[i].getValues();
 				else if(isLess)
 				{
-					System.out.println("Going to link " + i);
+					//System.out.println("Going to link " + i);
 					node = links[i];
 					break;
 				}
 				else if(i == numKeys - 1 //greater than last key
 						|| (isGreater && isLess(key, keys[i + 1].getKey()))) //greater than current key && less than next
 				{
-					System.out.println("Going to link " + (i + 1));
+					//System.out.println("Going to link " + (i + 1));
 					node = links[i + 1];
 					break;
 				}
@@ -92,106 +92,52 @@ public class CustomBTree
 		}
 	}
 	
-	private void makeNewRoot(Entry e)
+	private int addRecursively(Node n, Entry e)
 	{
-		System.out.println("Make new root, starting links: " + root.getNumLinks());
-		Node addTo = root;
-		Node newRoot = new Node(null); //create the new root
-		
-		root.setParent(newRoot);//set the parent of old root to the new root
-	
-		Entry middle = new Entry(root.getKeys()[MIDDLE]); //find middle entry
-		
-		Node secondHalf = split(root); //split the old root in half
-		
-		//remove middle key and swap last key to
-		secondHalf.getKeys()[0] = new Entry(secondHalf.getKeys()[1]);
-		secondHalf.getKeys()[1] = null;
-		
-		if(isGreater(e.getKey(), middle.getKey())) //see if we have to add the new entry to the second half
-			addTo = secondHalf;
-			
-		//repair parents links
-		newRoot.getLinks()[0] = root;
-		newRoot.getLinks()[1] = secondHalf;
-		
-		newRoot.addEntry(middle);
-		addTo.addEntry(e);
-		System.out.println("New root keys: " + newRoot.getNumKeys() + ", links: " + newRoot.getNumLinks());
-		System.out.println("First half size: " + root.getNumKeys() + ", links: " + root.getNumLinks());
-		System.out.println("Second half size: " + secondHalf.getNumKeys() + ", links: " + secondHalf.getNumLinks());	
-		root = newRoot;
-		height++;
-	}
-	
-	private void recursiveAdd(Node starting, Entry e)
-	{
-		if(!starting.isFull())
+		//If the leaf node is full
+		if(n.isFull())
 		{
-			System.out.println("Starting is not full, simply adding entry");
-			starting.addEntry(e);
+			Node newRoot = null;
+			
+			if(n.equals(root))
+			{
+				newRoot = new Node(null);
+				n.setParent(newRoot);
+			}
+			
+			System.out.println("Node overflow");
+			Entry[] overflow = n.getOverflow(e);
+			
+			Entry middle = new Entry(overflow[MIDDLE]);
+			
+			n.setKeys(overflow);
+			n.shiftLeft(n.getKeys().length - 1, MIDDLE);
+			
+			Entry[] fixed = new Entry[DEGREE - 1];
+			for(int i = 0; i < fixed.length; i++)
+				fixed[i] = overflow[i];
+			
+			n.setKeys(fixed);
+			
+			Node secondHalf = split(n);
+			
+			int middleIndex = addRecursively(n.getParent(), middle);
+			n.getParent().getLinks()[middleIndex] = n;
+			n.getParent().getLinks()[middleIndex + 1] = secondHalf;
+			
+			if(n.equals(root))
+			{
+				height++;
+				root = newRoot;
+			}
+			
+			return middleIndex;
 		}
 		else
 		{
-			System.out.println("Starting is full");
-			Node addTo = starting;
-			
-			if(starting.equals(root)) //we're at root and it's full
-			{
-				System.out.println("At root, and it's full. Making new one.");
-				makeNewRoot(e);
-			}
-			else //Node is full and not root
-			{
-				System.out.println("Node is full and it isn't root");
-				Entry middle = new Entry(starting.getKeys()[MIDDLE]);
-				
-				//first, split the child
-				Node secondHalf = split(starting);
-				
-				//remove middle key and swap last key to
-				secondHalf.getKeys()[0] = new Entry(secondHalf.getKeys()[1]);
-				secondHalf.getKeys()[1] = null;
-				
-				if(isGreater(e.getKey(), middle.getKey()))
-					addTo = secondHalf;
-				
-				//recursively add middle to parent
-				System.out.println("Recursive call");
-				recursiveAdd(starting.getParent(), middle);
-				
-				//and repair parents links
-				int linkIndex = findLink(starting.getParent(), starting);
-				if(linkIndex != -1)
-				{
-					System.out.println("Found link index! Appending second half");
-					starting.getParent().getLinks()[linkIndex + 1] = secondHalf;
-				}
-				else
-				{
-					System.out.println("Couldn't find link. Adding to end");
-					starting.getParent().getLinks()[starting.getParent().getNumLinks()] = secondHalf;
-				}
-				
-				for(Node n : starting.getParent().getLinks())
-				{
-					System.out.println((n == null));
-				}
-				System.out.println("Parent links: " + starting.getParent().getNumLinks());
-				System.out.println("Finishing recursiveAdd, adding entry");
-				addTo.addEntry(e);
-			}
+			System.out.println("Leaf node is not full, simply adding entry");
+			return n.addEntry(e);
 		}
-	}
-	
-	private int findLink(Node parent, Node child)
-	{
-		System.out.println("Parent num links: " + parent.getNumLinks());
-		for(int i = 0; i < parent.getNumLinks(); i++)
-			if(parent.getLinks()[i].equals(child))
-				return i;
-		
-		return -1;
 	}
 
 	private void insert(String key, Value value)
@@ -210,18 +156,8 @@ public class CustomBTree
 		}
 		
 		//We've found the leaf node
+		addRecursively(child, new Entry(key, value));
 		
-		//If the leaf node is full
-		if(child.isFull())
-		{
-			System.out.println("Leaf node overflow");
-			recursiveAdd(child, new Entry(key, value));
-		}
-		else
-		{
-			System.out.println("Leaf node is not full, simply adding entry");
-			child.addEntry(new Entry(key, value));
-		}
 	}
 	
 	private Node findNextChild(String key, Node n)

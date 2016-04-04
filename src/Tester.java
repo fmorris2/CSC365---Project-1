@@ -8,9 +8,7 @@ public class Tester
 	public static void main(String[] args)
 	{
 		CustomBTree bTree = new CustomBTree();
-		for(int i = 0; i < 100; i++)
-			bTree.put(""+i, new Value("dosof.com", 1.0));
-		/*
+		
 		bTree.put("noodle", new Value("blabla.com", 1.0));
 		bTree.put("dookie", new Value("blabla.com", 1.0));
 		bTree.put("dog", new Value("blabla.com", 1.0));
@@ -26,7 +24,7 @@ public class Tester
 		bTree.put("noodle head", new Value("blabla.com", 1.0));
 		bTree.put("metallica", new Value("blabla.com", 1.0));
 		bTree.put("needle", new Value("blabla.com", 1.0));
-		*/
+		
 		
 		
 		
