@@ -1,9 +1,18 @@
 package data_structures.btree;
 
+
 public class Entry implements Comparable<Entry>
 {
+	private static final int MAX_CHILDREN = 5;
+	
 	private String key;
-	private Value value;
+	private Value[] values = new Value[MAX_CHILDREN];
+	
+	public Entry(String key, Value value)
+	{
+		this.key = key;
+		this.values[0] = value;
+	}
 	
 	@Override
 	public int compareTo(Entry o)
@@ -16,8 +25,13 @@ public class Entry implements Comparable<Entry>
 		return key;
 	}
 	
-	public Value getValue()
+	public Value[] getValues()
 	{
-		return value;
+		return values;
+	}
+	
+	public void setKey(String key)
+	{
+		this.key = key;
 	}
 }

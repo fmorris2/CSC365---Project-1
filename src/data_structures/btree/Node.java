@@ -2,55 +2,105 @@ package data_structures.btree;
 
 public class Node
 {
-	private Entry[] children;
+	private Entry[] keys;
+	private Node[] links;
+	private Node parent;
 	
-	public Node()
+	public Node(Node parent)
 	{
-		children = new Entry[CustomBTree.DEGREE];
+		keys = new Entry[CustomBTree.DEGREE - 1];
+		links = new Node[CustomBTree.DEGREE];
+		this.parent = parent;
 	}
 	
-	public int getNumChildren()
+	public boolean isFull()
 	{
-		return children.length;
+		return getNumKeys() == keys.length;
 	}
 	
-	public Entry[] getChildren()
+	public boolean isLeaf()
 	{
-		return children;
+		for(Node n : links)
+			if(n != null)
+				return false;
+		
+		return true;
 	}
 	
-	public boolean addEntry(Entry e)
+	public Node getParent()
 	{
-		if(children.length == CustomBTree.DEGREE - 1)
-			return false;
+		return parent;
+	}
+	
+	public void setParent(Node n)
+	{
+		parent = n;
+	}
+
+	public Entry[] getKeys()
+	{
+		return keys;
+	}
+	
+	public Node[] getLinks()
+	{
+		return links;
+	}
+	
+	public int getNumKeys()
+	{
+		int c = 0;
+		for(Entry e : keys)
+			if(e != null)
+				c++;
+		
+		return c;
+	}
+	
+	public int getNumLinks()
+	{
+		int count = 0;
+		for(Node n : links)
+			if(n != null)
+				count++;
+		
+		return count;
+	}
+	
+	public int addEntry(Entry e)
+	{
+		if(getNumKeys() == CustomBTree.DEGREE - 1)
+			return -1;
 		
 		int index;
 		int comparison = 1;
 		
 		//Find appropriate index for the new entry
-		for(index = 0; index < children.length; index++)
+		for(index = 0; index < keys.length - 1; index++)
 		{
-			if(children[index] == null || comparison < 0)
+			//System.out.println("index: " + index);
+			if(keys[index] == null || comparison < 0)
 				break;
 			
-			comparison = e.compareTo(children[index]);
+			comparison = e.compareTo(keys[index]);
 		}
 		
-		if(children[index] == null) //Just insert, no swap needed
+		if(keys[index] == null) //Just insert, no swap needed
 		{
-			children[index] = e;
-			return true;
+			keys[index] = e;
+		}
+		else
+		{
+			//Swap if necessary
+			Entry temp = keys[index];
+			keys[index] = e;
+			if(comparison < 0 || index == 0)
+				keys[index + 1] = temp;
+			else
+				keys[index - 1] = temp;
 		}
 		
-		//Swap if necessary
-		Entry temp = children[index];
-		children[index] = e;
-		if(comparison < 0 || index == 0)
-			children[index + 1] = temp;
-		else
-			children[index - 1] = temp;
-		
-		return true;
+		return index;
 	}
 	
 }

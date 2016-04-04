@@ -21,7 +21,7 @@ public class Corpus extends ArrayList<CustomUrl>
 	public CustomUrl getClosestRelated(CustomUrl primary)
 	{
 		CustomUrl closest = primary;
-		double closestSimilarity = 0.0;
+		double closestSimilarity = -150.0;
 		
 		for(CustomUrl url : this)
 		{
