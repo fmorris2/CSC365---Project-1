@@ -14,6 +14,12 @@ public class Entry implements Comparable<Entry>
 		this.values[0] = value;
 	}
 	
+	public Entry(Entry e)
+	{
+		this.key = e.getKey();
+		this.values = e.getValues();
+	}
+	
 	@Override
 	public int compareTo(Entry o)
 	{

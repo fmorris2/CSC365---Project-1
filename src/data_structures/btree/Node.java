@@ -78,11 +78,11 @@ public class Node
 		//Find appropriate index for the new entry
 		for(index = 0; index < keys.length - 1; index++)
 		{
+			comparison = keys[index] == null ? -1 : e.compareTo(keys[index]);
+			
 			//System.out.println("index: " + index);
 			if(keys[index] == null || comparison < 0)
 				break;
-			
-			comparison = e.compareTo(keys[index]);
 		}
 		
 		if(keys[index] == null) //Just insert, no swap needed
@@ -91,16 +91,41 @@ public class Node
 		}
 		else
 		{
-			//Swap if necessary
-			Entry temp = keys[index];
-			keys[index] = e;
-			if(comparison < 0 || index == 0)
-				keys[index + 1] = temp;
+			//Shift if necessary
+			if(index == 0 || comparison <= 0)
+				shiftRight(index);
 			else
-				keys[index - 1] = temp;
+				shiftLeft(index);
+			
+			keys[index] = e;
 		}
 		
 		return index;
 	}
 	
+	private void shiftLeft(int index)
+	{
+		Entry temp = keys[index] == null ? null : new Entry(keys[index]);
+		keys[index] = null;
+		
+		for(int i = index - 1; i >= 0; i--)
+		{
+			Entry temp2 = keys[i] == null ? null : new Entry(keys[i]);
+			keys[i] = temp;
+			temp = temp2;
+		}
+	}
+	
+	private void shiftRight(int index)
+	{
+		Entry temp = keys[index] == null ? null : new Entry(keys[index]);
+		keys[index] = null;
+		
+		for(int i = index + 1; i < keys.length; i++)
+		{
+			Entry temp2 = keys[i] == null ? null : new Entry(keys[i]);
+			keys[i] = temp;
+			temp = temp2;
+		}
+	}
 }
