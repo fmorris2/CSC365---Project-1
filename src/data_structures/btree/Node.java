@@ -13,6 +13,13 @@ public class Node
 		this.parent = parent;
 	}
 	
+	public Node(Node copy, boolean t)
+	{
+		this.keys = copy.getKeys();
+		this.links = copy.getLinks();
+		this.parent = copy.getParent();
+	}
+	
 	public boolean isFull()
 	{
 		return getNumKeys() == keys.length;
@@ -142,6 +149,19 @@ public class Node
 		{
 			Entry temp2 = keys[i] == null ? null : new Entry(keys[i]);
 			keys[i] = temp;
+			temp = temp2;
+		}
+	}
+	
+	public void shiftLinksRight(int index, int endIndex)
+	{
+		Node temp = links[index] == null ? null : new Node(links[index], true);
+		links[index] = null;
+		
+		for(int i = index + 1; i < endIndex; i++)
+		{
+			Node temp2 = links[i] == null ? null : new Node(links[i]);
+			links[i] = temp;
 			temp = temp2;
 		}
 	}

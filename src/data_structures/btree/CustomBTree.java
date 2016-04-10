@@ -92,57 +92,101 @@ public class CustomBTree
 		}
 	}
 	
-	private int addRecursively(Node n, Entry e)
+	private void add(Node n, Entry e)
 	{
 		//If the leaf node is full
 		if(n.isFull())
 		{
-			Node newRoot = null;
-			
-			if(n.equals(root))
-			{
-				newRoot = new Node(null);
-				n.setParent(newRoot);
-			}
-			
 			System.out.println("Node overflow");
 			Entry[] overflow = n.getOverflow(e);
+			Entry[] parentOverflow = null;
+			Node[] overflowLinks = null;
 			
-			Entry middle = new Entry(overflow[MIDDLE]);
-			
-			n.setKeys(overflow);
-			n.shiftLeft(n.getKeys().length - 1, MIDDLE);
-			
-			Entry[] fixed = new Entry[DEGREE - 1];
-			for(int i = 0; i < fixed.length; i++)
-				fixed[i] = overflow[i];
-			
-			n.setKeys(fixed);
-			
-			Node secondHalf = split(n);
-			
-			int middleIndex = addRecursively(n.getParent(), middle);
-			n.getParent().getLinks()[middleIndex] = n;
-			n.getParent().getLinks()[middleIndex + 1] = secondHalf;
-			
-			if(n.equals(root))
+			while(overflow != null)
 			{
-				height++;
-				root = newRoot;
-			}
+				Node newRoot = null;
+				
+				if(n.equals(root))
+				{
+					System.out.println("NEED TO MAKE NEW ROOT!");
+					newRoot = new Node(null);
+					n.setParent(newRoot);
+				}
+				
+				Entry middle = new Entry(overflow[MIDDLE]);
+				
+				//START remove middle key from node
+				n.setKeys(overflow);
+				n.shiftLeft(n.getKeys().length - 1, MIDDLE);
+				
+				Entry[] fixed = new Entry[DEGREE - 1];
+				for(int i = 0; i < fixed.length; i++)
+					fixed[i] = overflow[i];
+				
+				n.setKeys(fixed);
+				//END remove middle key from node
+				
+				//Split the node in half
+				Node secondHalf = split(n);
+				int linkIndex = newRoot != null ? 0 : findLink(n.getParent(), n);
+				
+				//parent is also full, need to do something about that
+				if(n.getParent().isFull())
+				{
+					parentOverflow = n.getParent().getOverflow(middle);
+					overflowLinks = new Node[DEGREE + 1];
+					
+					Node[] parentLinks = n.getParent().getLinks();
+					boolean repaired = false;
+					
+					for(int i = 0; i < DEGREE; i++)
+					{
+						if(i <= linkIndex)
+							overflowLinks[i] = parentLinks[i];
+						else
+						{
+							
+							if(!repaired) //second half must be inserted into this index
+							{
+								overflowLinks[i] = secondHalf;
+								repaired = true;
+							}
+							
+							overflowLinks[i + 1] = parentLinks[i];
+						}
+					}
+					
+					overflow = n.getParent();
+				}
 			
-			return middleIndex;
+				
+				if(n.equals(root))
+				{
+					height++;
+					root = newRoot;
+				}
+			}
 		}
 		else
 		{
 			System.out.println("Leaf node is not full, simply adding entry");
-			return n.addEntry(e);
+			n.addEntry(e);
 		}
+	}
+	
+	private int findLink(Node parent, Node child)
+	{
+		int index;
+		for(index = 0; index < parent.getNumLinks(); index++)
+			if(parent.getLinks()[index].equals(child))
+				return index;
+		
+		return -1;
 	}
 
 	private void insert(String key, Value value)
 	{
-		System.out.println("Insert");
+		System.out.println("Insert " + key);
 		Node n = root;
 		Node child = n;
 		
