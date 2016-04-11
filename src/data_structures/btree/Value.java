@@ -23,11 +23,31 @@ public class Value
 		return tfIdf;
 	}
 	
+	public int getUtfLength()
+	{
+		try
+		{
+			return url.getBytes("UTF-32BE").length;
+		} 
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return 256;
+	}
+	
 	public byte[] getUrlUtf()
 	{
 		try
 		{
-			return url.getBytes("UTF-32BE");
+			byte[] bytes = new byte[256];
+			byte[] keyBytes = url.getBytes("UTF-32BE");
+			
+			for(int i = 0; i < keyBytes.length; i++)
+				bytes[i] = keyBytes[i];
+			
+			return bytes;
 		} 
 		catch (UnsupportedEncodingException e)
 		{

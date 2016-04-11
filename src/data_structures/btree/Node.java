@@ -2,28 +2,29 @@ package data_structures.btree;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 
 
 public class Node
 {	
 	private static final int LINKS_BLOCK_SIZE = CustomBTree.DEGREE * 4; //Each link is an integer, size 4 bytes
-	public static final int BLOCK_SIZE = LINKS_BLOCK_SIZE + ((CustomBTree.DEGREE - 1) * Entry.TOTAL_BLOCK_SIZE); //Block size in bytes
+	public static final int BLOCK_SIZE = LINKS_BLOCK_SIZE + ((CustomBTree.DEGREE - 1) * 8) +
+				((CustomBTree.DEGREE - 1) * Entry.TOTAL_BLOCK_SIZE); //Block size in bytes
 	
 	private Entry[] keys;
 	private int[] links;
-	private Node[] loadedLinks;
 	private int nodeNum;
 	private boolean needsSave;
 	private CustomBTree tree;
 	
-	public Node(CustomBTree tree)
+	public Node(CustomBTree tree, boolean increment)
 	{
 		keys = new Entry[CustomBTree.DEGREE - 1];
 		links = new int[CustomBTree.DEGREE];
-		loadedLinks = new Node[CustomBTree.DEGREE];
 		this.tree = tree;
 		this.nodeNum = tree.getNumNodes();
-		tree.incrementNumNodes();
+		if(increment)
+			tree.incrementNumNodes();
 	}
 	
 	public boolean isFull()
@@ -38,30 +39,67 @@ public class Node
 	
 	public Node getLink(int i)
 	{
-		return loadedLinks[i] != null ? loadedLinks[i] : read(i);
+		return read(i);
 	}
 	
 	private Node read(int blockNum)
 	{
 		RandomAccessFile raf = tree.getRaf();
+		int[] tempLinks = new int[CustomBTree.DEGREE];
+		Entry[] tempKeys = new Entry[CustomBTree.DEGREE - 1];
+		Node newNode = new Node(tree, false);
+		newNode.setKeys(tempKeys);
+		newNode.setLinks(tempLinks);
+		newNode.setNodeNum(blockNum);
 		
 		try
 		{
 			//seek to the appropriate block
-			raf.seek((BLOCK_SIZE + 1) * nodeNum);
+			System.out.println("Loading node at block num " + blockNum + " at location " + (BLOCK_SIZE + 1) * blockNum);
+			raf.seek((BLOCK_SIZE + 1) * blockNum);
 			
 			//load links
 			for(int i = 0; i < CustomBTree.DEGREE; i++)
-			{
-				links[i] = raf.readInt();
-				System.out.println("Loaded link " + i + " with value " + links[i]);
-			}
+				tempLinks[i] = raf.readInt();
 			
 			//load entries
 			for(int i = 0; i < CustomBTree.DEGREE; i++)
-			{
+			{	
+				//see how many bytes the key is
+				int numBytes = raf.readInt();
+				
+				if(numBytes == 0) //we have a null entry
+					continue;
+				
 				//load the key for this entry
-				String key
+				byte[] keyBytes = new byte[numBytes];
+				raf.readFully(keyBytes);
+				raf.skipBytes(256 - numBytes);
+				String key = new String(keyBytes, Charset.forName("UTF-32BE"));
+				
+				//load the values now
+				//first, we check the length of the key for the first value
+				Value[] vals = new Value[CustomBTree.DEGREE - 1];
+				Entry tempEntry = new Entry(key, vals);
+				for(int valueNum = 0; valueNum < vals.length; valueNum++)
+				{
+					int valKeyLength = raf.readInt();
+					
+					if(valKeyLength == 0)
+					{
+						raf.skipBytes(256+8);
+						continue;
+					}
+					
+					byte[] valKeyBytes = new byte[valKeyLength];
+					raf.readFully(valKeyBytes);
+					raf.skipBytes(256 - valKeyLength);
+					String valKey = new String(valKeyBytes, Charset.forName("UTF-32BE"));
+					double valTfIdf = raf.readDouble();
+					vals[valueNum] = new Value(valKey, valTfIdf);
+					tempEntry.setValues(vals);
+					tempKeys[i] = tempEntry;
+				}
 			}
 			
 		}
@@ -70,7 +108,7 @@ public class Node
 			e.printStackTrace();
 		}
 		
-		return null;
+		return newNode;
 	}
 	
 	private void save()
@@ -79,6 +117,8 @@ public class Node
 		
 		try
 		{
+			System.out.println("Attempting to save node #" + nodeNum);
+			System.out.println("Saving at location: " + (BLOCK_SIZE + 1) * nodeNum);
 			//seek to the appropriate block
 			raf.seek((BLOCK_SIZE + 1) * nodeNum);
 			
@@ -90,18 +130,30 @@ public class Node
 			for(Entry e : keys)
 			{
 				if(e == null)
+				{
+					raf.writeInt(0);
+					raf.write(new byte[Entry.TOTAL_BLOCK_SIZE]);
 					continue;
+				}
 				
 				//save the key for the entry first
+				//write the key length
+				raf.writeInt(e.getKeyUtfLength());
 				raf.write(e.getKeyUtf());
 				
 				//save the values for the entry next
 				for(Value v : e.getValues())
 				{
 					if(v == null)
+					{
+						raf.writeInt(0);
+						raf.write(new byte[256]);
+						raf.write(new byte[8]);
 						continue;
+					}
 					
 					//save the url for this value
+					raf.writeInt(v.getUtfLength());
 					raf.write(v.getUrlUtf());
 					
 					//save the tf-idf for this value
@@ -130,6 +182,11 @@ public class Node
 		keys = entries;
 	}
 	
+	public void setLinks(int[] links)
+	{
+		this.links = links;
+	}
+	
 	public int getNumKeys()
 	{
 		int c = 0;
@@ -142,20 +199,22 @@ public class Node
 	public boolean splitRoot(Entry e)
 	{
 		//Create new left and right nodes
-		Node l = new Node(tree);
-		Node r = new Node(tree);
+		Node l = new Node(tree, true);
+		Node r = new Node(tree, true);
 		//Switch keys to new nodes
 		for(int x = 0; x < (CustomBTree.DEGREE-1)/2; x++)
 		{
 			l.keys[x] = this.keys[x];
 			r.keys[x] = this.keys[x+(CustomBTree.DEGREE/2)];
 		}
+		
 		//Switch links
 		for(int x = 0; x < CustomBTree.DEGREE/2; x++)
 		{
 			l.links[x] = this.links[x];
 			r.links[x] = this.links[x+(CustomBTree.DEGREE/2)];
 		}
+		
 		//Fix root keys
 		keys[0] = keys[(CustomBTree.DEGREE-1)/2];
 		for(int x = 1; x < keys.length; x++)
@@ -175,6 +234,7 @@ public class Node
 			links[x] = 0;
 		}
 		needsSave = true;
+		save();
 		return insert(e);
 	}
 	
@@ -189,6 +249,7 @@ public class Node
 				{
 					needsSave = true;
 					keys[x] = e;
+					System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
 					return true;
 				}
 				else
@@ -250,6 +311,7 @@ public class Node
 					
 					keys[x] = e;
 					needsSave = true;
+					System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
 					return true;
 				}
 			}
@@ -293,7 +355,7 @@ public class Node
 				break;
 			}
 		}
-		Node right = new Node(tree);//make new right node
+		Node right = new Node(tree, true);//make new right node
 		for(int x = 0; x < (CustomBTree.DEGREE/2)-1; x++)
 		{
 			right.keys[x] = fNode.keys[x+(CustomBTree.DEGREE/2)];
@@ -314,12 +376,17 @@ public class Node
 	
 	public Value[] search(String key)
 	{
+		System.out.println("Searching for key " + key);
 		for(int x = 0; x < keys.length; x++)
 		{
 			if(keys[x] == null)
 			{
+				System.out.println("While searching for " + key + ", we encountered a null key");
 				if(isLeaf())
+				{
+					System.out.println("We're at a leaf node");
 					return null;
+				}
 				
 				return getLink(x).search(key);
 			}
@@ -328,6 +395,12 @@ public class Node
 			else if(key.compareTo(keys[x].getKey()) < 0)
 				return isLeaf() ? null : getLink(x).search(key);
 		}
+		
 		return null;
+	}
+	
+	private void setNodeNum(int i)
+	{
+		nodeNum = i;
 	}
 }

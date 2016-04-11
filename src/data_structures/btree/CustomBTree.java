@@ -23,7 +23,7 @@ public class CustomBTree
 			File f = new File("trees/"+parentUrl+".raf");
 			
 			raf = new RandomAccessFile(f, "rw");
-			root = new Node(this);
+			root = new Node(this, true);
 		}
 		catch(Exception e)
 		{
@@ -33,49 +33,31 @@ public class CustomBTree
 	
 	public Value[] get(String key)
 	{
-		return search(key);
-	}
-	
-	private Value[] search(String key)
-	{
 		return root.search(key);
 	}
 	
 	public boolean put(String key, Value value)
 	{
+		System.out.println("Inserting entry with key " + key + " and value " + value.getUrl() + ", " + value.getTfIdf());
 		return insert(new Entry(key, value));
 	}
 	
 	private boolean insert(Entry e)
 	{
-		Value[] existing = get(e.getKey());
-		
-		if(existing != null) //Key already exists in tree
+		if(findDuplicate(root, e) != null)
 		{
-			for(int i = 0; i < existing.length; i++)
-			{
-				if(existing[i] == null) //There is an open slot to put this entry
-				{
-					existing[i] = e.getValues()[0];
-					return true;
-				}
-			}
-			
-			return false; //There are no open slots to put the entry
+			System.out.println("DUPLICATE EXISTS IN TREE");
 		}
-		else //Key doesn't exist in tree
+		if(root.isFull())//if root is full
 		{
-			if(root.isFull())//if root is full
+			if(root.splitRoot(e)) //Split root and increment height
 			{
-				if(root.splitRoot(e)) //Split root and increment height
-				{
-					height++;
-					return true;
-				}
-			}
-			else if(root.insert(e)) //Insert the entry down the tree
+				height++;
 				return true;
+			}
 		}
+		else if(root.insert(e)) //Insert the entry down the tree
+			return true;
 		
 		return false;	
 	}
@@ -98,5 +80,10 @@ public class CustomBTree
 	public void incrementNumNodes()
 	{
 		numNodes++;
+	}
+	
+	public Node getRoot()
+	{
+		return root;
 	}
 }
