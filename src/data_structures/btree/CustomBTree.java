@@ -38,16 +38,12 @@ public class CustomBTree
 	
 	public boolean put(String key, Value value)
 	{
-		System.out.println("Inserting entry with key " + key + " and value " + value.getUrl() + ", " + value.getTfIdf());
+		//System.out.println("Inserting entry with key " + key + " and value " + value.getUrl() + ", " + value.getTfIdf());
 		return insert(new Entry(key, value));
 	}
 	
 	private boolean insert(Entry e)
 	{
-		if(findDuplicate(root, e) != null)
-		{
-			System.out.println("DUPLICATE EXISTS IN TREE");
-		}
 		if(root.isFull())//if root is full
 		{
 			if(root.splitRoot(e)) //Split root and increment height

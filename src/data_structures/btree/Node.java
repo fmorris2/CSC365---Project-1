@@ -39,7 +39,7 @@ public class Node
 	
 	public Node getLink(int i)
 	{
-		return read(i);
+		return read(links[i]);
 	}
 	
 	private Node read(int blockNum)
@@ -55,7 +55,7 @@ public class Node
 		try
 		{
 			//seek to the appropriate block
-			System.out.println("Loading node at block num " + blockNum + " at location " + (BLOCK_SIZE + 1) * blockNum);
+			//System.out.println("Loading node at block num " + blockNum + " at location " + (BLOCK_SIZE + 1) * blockNum);
 			raf.seek((BLOCK_SIZE + 1) * blockNum);
 			
 			//load links
@@ -117,8 +117,8 @@ public class Node
 		
 		try
 		{
-			System.out.println("Attempting to save node #" + nodeNum);
-			System.out.println("Saving at location: " + (BLOCK_SIZE + 1) * nodeNum);
+			//System.out.println("Attempting to save node #" + nodeNum);
+			//System.out.println("Saving at location: " + (BLOCK_SIZE + 1) * nodeNum);
 			//seek to the appropriate block
 			raf.seek((BLOCK_SIZE + 1) * nodeNum);
 			
@@ -151,6 +151,8 @@ public class Node
 						raf.write(new byte[8]);
 						continue;
 					}
+					
+					//System.out.println("Writing non-null val for key " + e.getKey() + " with val " + v.getUrl() + ", " + v.getTfIdf());
 					
 					//save the url for this value
 					raf.writeInt(v.getUtfLength());
@@ -249,7 +251,7 @@ public class Node
 				{
 					needsSave = true;
 					keys[x] = e;
-					System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
+					//System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
 					return true;
 				}
 				else
@@ -275,6 +277,16 @@ public class Node
 			}
 			else if(e.compareTo(keys[x]) == 0)
 			{
+				for(int i = 0; i < keys[x].getValues().length; i++)
+				{
+					if(keys[x].getValues()[i] == null)
+					{
+						keys[x].getValues()[i] = e.getValues()[0];
+						save();
+						return true;
+					}
+				}
+				
 				return false;
 			}
 			else if(e.compareTo(keys[x]) < 0)
@@ -311,7 +323,7 @@ public class Node
 					
 					keys[x] = e;
 					needsSave = true;
-					System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
+					//System.out.println("Added entry with key " + e.getKey() + " to node #" + nodeNum);
 					return true;
 				}
 			}
@@ -376,15 +388,16 @@ public class Node
 	
 	public Value[] search(String key)
 	{
-		System.out.println("Searching for key " + key);
+		//System.out.println("Searching for key " + key);
 		for(int x = 0; x < keys.length; x++)
 		{
+			//System.out.println("Searching key at index " + x + " in node #" + nodeNum);
 			if(keys[x] == null)
 			{
-				System.out.println("While searching for " + key + ", we encountered a null key");
+				//System.out.println("While searching for " + key + ", we encountered a null key");
 				if(isLeaf())
 				{
-					System.out.println("We're at a leaf node");
+					//System.out.println("We're at a leaf node");
 					return null;
 				}
 				
@@ -394,6 +407,8 @@ public class Node
 				return keys[x].getValues();
 			else if(key.compareTo(keys[x].getKey()) < 0)
 				return isLeaf() ? null : getLink(x).search(key);
+			else if(x == keys.length - 1)
+				return isLeaf() ? null : getLink(x + 1).search(key);
 		}
 		
 		return null;
