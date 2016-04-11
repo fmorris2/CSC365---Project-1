@@ -2,6 +2,7 @@ package data_structures.btree;
 
 import java.io.File;
 import java.io.RandomAccessFile;
+import java.util.Date;
 
 
 public class CustomBTree
@@ -24,6 +25,8 @@ public class CustomBTree
 			
 			raf = new RandomAccessFile(f, "rw");
 			root = new Node(this, true);
+			if(raf.length() > 0)
+				root = root.read(0);
 		}
 		catch(Exception e)
 		{
@@ -44,6 +47,7 @@ public class CustomBTree
 	
 	private boolean insert(Entry e)
 	{
+		//System.out.println("Inserting entry with key " + e.getKey() + " and value " + e.getValues()[0].getUrl() + " - " + e.getValues()[0].getTfIdf());
 		if(root.isFull())//if root is full
 		{
 			if(root.splitRoot(e)) //Split root and increment height
@@ -56,6 +60,28 @@ public class CustomBTree
 			return true;
 		
 		return false;	
+	}
+	
+	public void removeRaf()
+	{
+		try
+		{
+			raf.close();
+			File f = new File("trees/"+parentUrl+".raf");
+			
+			if(f.exists())
+			{
+				System.out.println("RAF exists...");
+				System.out.println("Delete: " + f.delete());
+			}
+			raf = new RandomAccessFile(f, "rw");
+			numNodes = 0;
+			root = new Node(this, true);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public int getHeight()
@@ -71,6 +97,13 @@ public class CustomBTree
 	public RandomAccessFile getRaf()
 	{
 		return raf;
+	}
+	
+	public Date getLastModifiedRaf()
+	{
+		File f = new File("trees/"+parentUrl+".raf");
+		
+		return f.exists() && f.length() > 0 ? new Date(f.lastModified()) : null;
 	}
 	
 	public void incrementNumNodes()

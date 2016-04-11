@@ -42,7 +42,7 @@ public class Node
 		return read(links[i]);
 	}
 	
-	private Node read(int blockNum)
+	public Node read(int blockNum)
 	{
 		RandomAccessFile raf = tree.getRaf();
 		int[] tempLinks = new int[CustomBTree.DEGREE];
@@ -63,7 +63,7 @@ public class Node
 				tempLinks[i] = raf.readInt();
 			
 			//load entries
-			for(int i = 0; i < CustomBTree.DEGREE; i++)
+			for(int i = 0; i < CustomBTree.DEGREE - 1; i++)
 			{	
 				//see how many bytes the key is
 				int numBytes = raf.readInt();
@@ -79,7 +79,7 @@ public class Node
 				
 				//load the values now
 				//first, we check the length of the key for the first value
-				Value[] vals = new Value[CustomBTree.DEGREE - 1];
+				Value[] vals = new Value[Entry.MAX_CHILDREN];
 				Entry tempEntry = new Entry(key, vals);
 				for(int valueNum = 0; valueNum < vals.length; valueNum++)
 				{
@@ -247,7 +247,8 @@ public class Node
 		{
 			if(keys[x] == null)
 			{
-				if(links[x] == 0)
+				//System.out.println("key at index " + x + " in node " + nodeNum + " is null");
+				if(links[x] == 0) //Leaf, just add it to this node
 				{
 					needsSave = true;
 					keys[x] = e;

@@ -14,7 +14,6 @@ public class Application
 	private CustomUrl primaryUrl;
 	private CustomUrl closestUrl;
 	private GUI gui;
-	private CustomBTree freqTree;
 	private WebPageCache pageCache;
 	
 	public Application(WebPageCache pageCache, CustomBTree freqTree)
@@ -23,7 +22,6 @@ public class Application
 		this.potentialUrls = new ArrayList<>();
 		this.gui = new GUI(this);
 		this.gui.setVisible(true);
-		this.freqTree = freqTree;
 		this.pageCache = pageCache;
 	}
 	
