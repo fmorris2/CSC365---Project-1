@@ -7,8 +7,12 @@ public class Tester
 
 	public static void main(String[] args)
 	{
-		CustomBTree bTree = new CustomBTree();
+		CustomBTree bTree = new CustomBTree("test.com");
 		
+		for(int i = 0; i < 1000; i++)
+		{
+			bTree.put(""+i, new Value("todo.com", 1.0));
+		}
 		bTree.put("noodle", new Value("blabla.com", 1.0));
 		bTree.put("dookie", new Value("blabla.com", 1.0));
 		bTree.put("dog", new Value("blabla.com", 1.0));
@@ -26,9 +30,6 @@ public class Tester
 		bTree.put("needle", new Value("blabla.com", 1.0));
 		
 		
-		
-		
-		System.out.println("bTree height: " + bTree.getHeight() + ", numPairs: " + bTree.getNumPairs());
 		Value[] v = bTree.get("water");
 		if(v == null)
 			System.out.println("Value is null");
@@ -40,7 +41,6 @@ public class Tester
 				System.out.println("Val with url " + val.getUrl() + " with tf-idf of " + val.getTfIdf());
 			}
 		
-		System.out.println(bTree);
 	}
 
 }

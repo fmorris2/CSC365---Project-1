@@ -1,5 +1,7 @@
 package data_structures.btree;
 
+import java.io.UnsupportedEncodingException;
+
 public class Value
 {
 	private String url;
@@ -19,5 +21,19 @@ public class Value
 	public double getTfIdf()
 	{
 		return tfIdf;
+	}
+	
+	public byte[] getUrlUtf()
+	{
+		try
+		{
+			return url.getBytes("UTF-32BE");
+		} 
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

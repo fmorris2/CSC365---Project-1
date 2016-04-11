@@ -17,7 +17,7 @@ public class Application
 	private CustomBTree freqTree;
 	private WebPageCache pageCache;
 	
-	public Application(WebPageCache pageCache ,CustomBTree freqTree)
+	public Application(WebPageCache pageCache, CustomBTree freqTree)
 	{
 		this.corpus = new Corpus();
 		this.potentialUrls = new ArrayList<>();
@@ -144,7 +144,6 @@ public class Application
     {
     	System.out.println("On end");
     	pageCache.save(Loader.PAGE_CACHE_PATH);
-    	freqTree.save(Loader.B_TREE_PATH);
     }
 	
 }

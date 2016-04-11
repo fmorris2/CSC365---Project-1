@@ -15,8 +15,7 @@ public class Loader
 		this.pageCache = new WebPageCache();
 		this.pageCache.load(PAGE_CACHE_PATH);
 		
-		this.freqTree = new CustomBTree();
-		this.freqTree.load(B_TREE_PATH);
+		this.freqTree = new CustomBTree("test.com");
 	}
 	
 	public CustomBTree getFreqTree()
