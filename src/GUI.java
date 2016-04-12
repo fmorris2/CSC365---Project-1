@@ -1,4 +1,3 @@
-import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -148,6 +147,10 @@ public class GUI extends javax.swing.JFrame
     	application = new Application(CustomUrl.fixInput(primaryTextBox.getText()));
     	application.execute();
     	categoryBox.setText(application.getCategory().name());
+    	String suggestions = "";
+    	for(String suggestion : application.getSuggestions())
+    		suggestions += (suggestion +"\n");
+    	relatedLinks.setText(suggestions);
     }
     
     public JTextArea getRelatedLinks()

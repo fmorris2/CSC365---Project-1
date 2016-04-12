@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +18,7 @@ public class Application
 	private Set<String> words;
 	private Category category;
 	private String[] suggestions;
-	private CustomHashTable<String, Integer> linkOccurences;
+	private CustomHashTable<Category, List<Suggestion>> linkOccurences;
 	private List<String> exclusions = Arrays.asList("and", "or", "to", "the");
 	
 	public Application(String url)
@@ -40,7 +42,7 @@ public class Application
     		
     		for(Category c : Category.values())
     		{
-    			double toCompare = sumTfIdf(c.getBTree());
+    			double toCompare = sumTfIdf(c, c.getBTree());
     			if(toCompare > highestSum)
     			{
     				mostSimilar = c;
@@ -52,6 +54,14 @@ public class Application
     		}
     		
     		category = mostSimilar;
+    		
+    		List<Suggestion> suggestionsList = linkOccurences.get(category);
+    		Collections.sort(suggestionsList);
+    		
+    		for(int i = 0; i < suggestions.length; i++)
+    			suggestions[i] = suggestionsList.get(i).link + " - " + suggestionsList.get(i).amount;
+    			
+    		
     		System.out.println("Most similar category: " + mostSimilar);
    
     	}
@@ -61,15 +71,13 @@ public class Application
     	}
 	}
 	
-	private double sumTfIdf(CustomBTree bTree)
+	private double sumTfIdf(Category c, CustomBTree bTree)
 	{
 		double sum = 0;
 		
 		for(String word : words)
 		{
-			long ms = System.currentTimeMillis();
 			Value[] vals = bTree.get(word);
-			//System.out.println("Took " + (System.currentTimeMillis() - ms) + "ms to find the entries for " + word);
 			
 			if(vals == null)
 				continue;
@@ -80,14 +88,26 @@ public class Application
 					continue;
 				
 				sum += v.getTfIdf();
-				Integer numTimes = linkOccurences.get(v.getUrl());
+				List<Suggestion> currentSuggestions = linkOccurences.get(c);
+				if(currentSuggestions == null)
+					currentSuggestions = new ArrayList<>();
 				
-				if(numTimes == null)
-					numTimes = 1;
+				Suggestion s = null;
+				for(Suggestion s1 : currentSuggestions)
+				{
+					if(s1.link.equals(v.getUrl()))
+					{
+						s = s1;
+						break;
+					}
+				}
+			
+				if(s == null)
+					currentSuggestions.add(new Suggestion(v.getUrl(), 1));
 				else
-					numTimes++;
+					s.amount++;
 				
-				linkOccurences.put(v.getUrl(), numTimes);
+				linkOccurences.put(c, currentSuggestions);
 			}
 		}
 		
@@ -136,5 +156,59 @@ public class Application
     public String[] getSuggestions()
     {
     	return suggestions;
+    }
+    
+    private class Suggestion implements Comparable<Suggestion>
+    {
+    	String link;
+    	int amount;
+    	
+    	public Suggestion(String link, int amount)
+    	{
+    		this.link = link;
+    		this.amount = amount;
+    	}
+
+		@Override
+		public int hashCode()
+		{
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + getOuterType().hashCode();
+			result = prime * result + ((link == null) ? 0 : link.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj)
+		{
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			Suggestion other = (Suggestion) obj;
+			if (!getOuterType().equals(other.getOuterType()))
+				return false;
+			if (link == null)
+			{
+				if (other.link != null)
+					return false;
+			} else if (!link.equals(other.link))
+				return false;
+			return true;
+		}
+
+		@Override
+		public int compareTo(Suggestion o)
+		{
+			return o.amount - amount;
+		}
+
+		private Application getOuterType()
+		{
+			return Application.this;
+		}
     }
 }

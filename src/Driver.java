@@ -8,5 +8,4 @@ public class Driver
 		GUI gui = new GUI();
 		gui.setVisible(true);
 	}
-
 }
