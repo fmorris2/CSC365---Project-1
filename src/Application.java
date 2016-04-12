@@ -1,4 +1,6 @@
+import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import data_structures.CustomHashTable;
@@ -12,8 +14,10 @@ public class Application
 	
 	private String url;
 	private Set<String> words;
+	private Category category;
 	private String[] suggestions;
 	private CustomHashTable<String, Integer> linkOccurences;
+	private List<String> exclusions = Arrays.asList("and", "or", "to", "the");
 	
 	public Application(String url)
 	{
@@ -47,6 +51,7 @@ public class Application
     			System.out.println("sumTfIdf for category " + c + ": " + toCompare);
     		}
     		
+    		category = mostSimilar;
     		System.out.println("Most similar category: " + mostSimilar);
    
     	}
@@ -111,6 +116,8 @@ public class Application
     		{
     			if(s.length() == 0)
     				continue;
+    			if(exclusions.contains(s))
+    				continue;
     			
     			words.add(s);
     		}
@@ -119,5 +126,15 @@ public class Application
 		{
 			e.printStackTrace();
 		}
+    }
+    
+    public Category getCategory()
+    {
+    	return category;
+    }
+    
+    public String[] getSuggestions()
+    {
+    	return suggestions;
     }
 }

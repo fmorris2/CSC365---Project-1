@@ -12,10 +12,9 @@ public class GUI extends javax.swing.JFrame
 	
 	private Application application;
 	
-	public GUI(Application application) 
+	public GUI() 
     {
         initComponents();
-        this.application = application;
     }
                        
 	private void initComponents() 
@@ -32,7 +31,7 @@ public class GUI extends javax.swing.JFrame
         relatedLinks = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("CSC 365 - Project #2");
+        setTitle("CSC 365 - Project #1");
         setAlwaysOnTop(true);
         setResizable(false);
 
@@ -66,6 +65,7 @@ public class GUI extends javax.swing.JFrame
         categoryBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
         categoryBox.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
+        relatedLinks.setEditable(false);
         relatedLinks.setColumns(20);
         relatedLinks.setRows(5);
         jScrollPane1.setViewportView(relatedLinks);
@@ -140,12 +140,14 @@ public class GUI extends javax.swing.JFrame
         );
 
         pack();
-    }// </editor-fold>   
+    }// </editor-fold> 
 
 	
     private void calculateButtonActionPerformed(java.awt.event.ActionEvent evt) 
-    {                                                
+    {           
+    	application = new Application(CustomUrl.fixInput(primaryTextBox.getText()));
     	application.execute();
+    	categoryBox.setText(application.getCategory().name());
     }
     
     public JTextArea getRelatedLinks()
@@ -158,16 +160,6 @@ public class GUI extends javax.swing.JFrame
     	return primaryTextBox;
     }
     
-    public JLabel getCategoryLabel()
-    {
-    	return categoryLabel;
-    }
-    
-    public JLabel getCategoryBox()
-    {
-    	return categoryBox;
-    }
-                   
     private javax.swing.JLabel authorLabel;
     private javax.swing.JButton calculateButton;
     private javax.swing.JLabel categoryBox;

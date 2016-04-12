@@ -10,7 +10,7 @@ public class CustomUrl
 		this.freqTable = new FrequencyTable(corpus);
 	}
 	
-	public String fixInput(String url)
+	public static String fixInput(String url)
 	{
 		final boolean CONTAINS_HTTP = url.contains("http");
 		
