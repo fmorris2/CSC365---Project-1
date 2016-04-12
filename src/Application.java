@@ -1,53 +1,54 @@
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import data_structures.WebPageCache;
+import data_structures.CustomHashTable;
 import data_structures.btree.CustomBTree;
+import data_structures.btree.Value;
 
 
 public class Application
 {
-	private Corpus corpus;
-	private List<CustomUrl> potentialUrls;
-	private CustomUrl primaryUrl;
-	private CustomUrl closestUrl;
-	private GUI gui;
-	private WebPageCache pageCache;
+	private static final int NUM_SUGGESTIONS = 5; //we'll suggest the top 5 links in the category
 	
-	public Application(WebPageCache pageCache, CustomBTree freqTree)
+	private String url;
+	private Set<String> words;
+	private String[] suggestions;
+	private CustomHashTable<String, Integer> linkOccurences;
+	
+	public Application(String url)
 	{
-		this.corpus = new Corpus();
-		this.potentialUrls = new ArrayList<>();
-		this.gui = new GUI(this);
-		this.gui.setVisible(true);
-		this.pageCache = pageCache;
+		this.url = url;
+		this.words = new HashSet<>();
+		this.linkOccurences = new CustomHashTable<>();
+		this.suggestions = new String[NUM_SUGGESTIONS];
 	}
 	
 	public void execute()
 	{
 		try
     	{
-    		//clear corpus from previous calculations
-    		corpus.clear();
-    		potentialUrls.clear();
-    		
-    		//parse GUI info
-    		parseInfo();
-    		
-    		//parse words from all of the web pages
-    		long time = System.currentTimeMillis();
+    		//parse words from primary url
     		addWords();
-    		System.out.println("It took " + (System.currentTimeMillis() - time) + "ms to parse the web pages");
+    		System.out.println("Added " + words.size() + " words");
     		
-    		//calculate TF-IDF values for each word in each document
-    		calculateTfIdf();
+    		Category mostSimilar = null;
+    		double highestSum = -1;
     		
-    		//compare and find most closely related URL
-    		closestUrl = corpus.getClosestRelated(primaryUrl);
-    		gui.getClosestLabel().setText("Closest: " + closestUrl.getUrl());
-    		System.out.println(closestUrl.getUrl() + " is most closely related with " + primaryUrl.getUrl());
+    		for(Category c : Category.values())
+    		{
+    			double toCompare = sumTfIdf(c.getBTree());
+    			if(toCompare > highestSum)
+    			{
+    				mostSimilar = c;
+    				highestSum = toCompare;
+    			}
+    			
+    			System.out.println("Checking category " + c);
+    			System.out.println("sumTfIdf for category " + c + ": " + toCompare);
+    		}
+    		
+    		System.out.println("Most similar category: " + mostSimilar);
+   
     	}
     	catch(Exception e)
     	{
@@ -55,93 +56,68 @@ public class Application
     	}
 	}
 	
-	private void calculateTfIdf()
-    {
-    	for(CustomUrl url : corpus)
-    		url.getFreqTable().calculate();
-    }
+	private double sumTfIdf(CustomBTree bTree)
+	{
+		double sum = 0;
+		
+		for(String word : words)
+		{
+			long ms = System.currentTimeMillis();
+			Value[] vals = bTree.get(word);
+			//System.out.println("Took " + (System.currentTimeMillis() - ms) + "ms to find the entries for " + word);
+			
+			if(vals == null)
+				continue;
+			
+			for(Value v : vals)
+			{
+				if(v == null)
+					continue;
+				
+				sum += v.getTfIdf();
+				Integer numTimes = linkOccurences.get(v.getUrl());
+				
+				if(numTimes == null)
+					numTimes = 1;
+				else
+					numTimes++;
+				
+				linkOccurences.put(v.getUrl(), numTimes);
+			}
+		}
+		
+		return sum;
+	}
     
     private void addWords()
     {
-    	for(CustomUrl url : corpus)
-    	{
-    		try
+		try
+		{
+    		System.out.println("Adding words from url: " + url);
+    		
+    		//parse body of web page with JSoup
+    		String body = Utils.getWebPageBody(url);
+    		
+    		//split by spaces
+    		String[] bodyParts = body != null ? body.split(" ") : null;
+    		
+    		if(bodyParts == null)
     		{
-    			if(isCached(url))
+    			System.out.println("ERROR: COULD NOT PARSE FROM PRIMARY URL!");
+    			return;
+    		}
+    			
+    		for(String s : bodyParts)
+    		{
+    			if(s.length() == 0)
     				continue;
     			
-	    		System.out.println("Adding words from url: " + url.getUrl());
-	    		
-	    		//parse body of web page with JSoup
-	    		String body = Utils.getWebPageBody(url.getUrl());
-	    		
-	    		//split by spaces
-	    		String[] bodyParts = body != null ? body.split(" ") : null;
-	    		
-	    		if(bodyParts == null)
-	    			continue;
-	    		
-	    		for(String s : bodyParts)
-	    		{
-	    			if(s.length() == 0)
-	    				continue;
-	    			
-	    			url.getFreqTable().addWord(s);
-	    		}
+    			words.add(s);
     		}
-    		catch(Exception e)
-    		{
-    			e.printStackTrace();
-    		}
-    	}
-    }
-    
-    private boolean isCached(CustomUrl url)
-    {
-    	long lastModified;
-		
-    	try
-    	{
-			URLConnection connection = new URL(url.getUrl()).openConnection();
-			lastModified = connection.getLastModified();
-			
-			String cachedVal = pageCache.get(url.getUrl());
-			if(cachedVal != null)
-			{
-				if(!cachedVal.equals(""+lastModified))
-					pageCache.put(url.getUrl(), ""+lastModified);
-				else
-					return true;
-			}
-			else if(lastModified > 0)
-				pageCache.put(url.getUrl(), ""+lastModified);
-    	}
-    	catch(Exception e)
-    	{
-    		e.printStackTrace();
-    	}
-    	
-    	return false;
-    }
-    
-    private void parseInfo()
-    {
-    	primaryUrl = new CustomUrl(gui.getPrimaryTextBox().getText(), corpus);
-    	corpus.setPrimaryUrl(primaryUrl);
-		
-		//Parse potential urls
-		for (String line : gui.getPotentialTextArea().getText().split("\\n"))
+		}
+		catch(Exception e)
 		{
-			line = line.trim();
-			if(!line.isEmpty())
- 				potentialUrls.add(new CustomUrl(line, corpus));
+			e.printStackTrace();
 		}
     }
-    
-    public void end()
-    {
-    	System.out.println("On end");
-    	pageCache.save(Loader.PAGE_CACHE_PATH);
-    }
-	
 }

@@ -10,7 +10,7 @@ import data_structures.btree.Value;
 
 public enum Category
 {
-	BOOKS("http://www.nytimes.com/section/books"),
+	BOOKS("http://www.goodreads.com/"),
 	BUSINESS("http://www.businessinsider.com/"),
 	EDUCATION("http://www.education.com/"),
 	ENTERTAINMENT("http://www.ew.com/"),
@@ -31,7 +31,7 @@ public enum Category
 	TRAVEL("http://www.travelweekly.com/"),
 	WEATHER("http://www.weather.com/");
 	
-	private static final int MAX_SUB_LINKS = 20;
+	private static final int MAX_SUB_LINKS = 10;
 	
 	private String parentUrl;
 	private Corpus corpus;
@@ -42,7 +42,7 @@ public enum Category
 		this.parentUrl = parentUrl;
 		this.corpus = new Corpus();
 		bTree = new CustomBTree(parentUrl.substring(11, parentUrl.indexOf("/", 12)));
-		if(needsUpdate(bTree.getLastModifiedRaf())) //TODO if bTree needs to be updated, then load it again
+		if(needsUpdate(bTree.getLastModifiedRaf()))
 		{
 			System.out.println("bTree for " + this + " needs update!");
 			//first, remove the existing file

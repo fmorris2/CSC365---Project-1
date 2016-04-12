@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.Charset;
 
+import data_structures.CustomHashTable;
+
 
 public class Node
 {	
@@ -13,6 +15,7 @@ public class Node
 	
 	private Entry[] keys;
 	private int[] links;
+	private CustomHashTable<Integer, Node> loadedLinks;
 	private int nodeNum;
 	private boolean needsSave;
 	private CustomBTree tree;
@@ -21,6 +24,7 @@ public class Node
 	{
 		keys = new Entry[CustomBTree.DEGREE - 1];
 		links = new int[CustomBTree.DEGREE];
+		loadedLinks = new CustomHashTable<>();
 		this.tree = tree;
 		this.nodeNum = tree.getNumNodes();
 		if(increment)
@@ -39,7 +43,9 @@ public class Node
 	
 	public Node getLink(int i)
 	{
-		return read(links[i]);
+		Node inRam = loadedLinks.get(links[i]);
+		//System.out.println("inRam: " + (inRam != null));
+		return inRam != null ? inRam : read(links[i]);
 	}
 	
 	public Node read(int blockNum)
@@ -108,12 +114,14 @@ public class Node
 			e.printStackTrace();
 		}
 		
+		loadedLinks.put(blockNum, newNode);
 		return newNode;
 	}
 	
 	private void save()
 	{
 		RandomAccessFile raf = tree.getRaf();
+		loadedLinks.put(nodeNum, this);
 		
 		try
 		{

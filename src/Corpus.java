@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 
+import data_structures.btree.CustomBTree;
+
 
 public class Corpus extends ArrayList<CustomUrl>
 {
@@ -18,7 +20,8 @@ public class Corpus extends ArrayList<CustomUrl>
 		return total;
 	}
 	
-	public CustomUrl getClosestRelated(CustomUrl primary)
+	/*
+	public CustomUrl getClosestRelated(CustomUrl primary, CustomBTree bTree)
 	{
 		CustomUrl closest = primary;
 		double closestSimilarity = -150.0;
@@ -28,7 +31,7 @@ public class Corpus extends ArrayList<CustomUrl>
 			if(url.equals(primary))
 				continue;
 			
-			double similarity = FrequencyTable.calculateAngle(primary.getFreqTable(), url.getFreqTable());
+			double similarity = primary.getFreqTable().sumTfIdf(bTree);//FrequencyTable.calculateAngle(primary.getFreqTable(), url.getFreqTable());
 			
 			if(similarity > closestSimilarity)
 			{
@@ -39,6 +42,7 @@ public class Corpus extends ArrayList<CustomUrl>
 		
 		return closest;
 	}
+	*/
 	
 	public void setPrimaryUrl(CustomUrl url)
 	{

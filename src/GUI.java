@@ -1,6 +1,3 @@
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -18,7 +15,6 @@ public class GUI extends javax.swing.JFrame
 	public GUI(Application application) 
     {
         initComponents();
-        addClosingListener();
         this.application = application;
     }
                        
@@ -30,13 +26,13 @@ public class GUI extends javax.swing.JFrame
         calculateButton = new javax.swing.JButton();
         primaryTextBox = new javax.swing.JTextField();
         primaryLabel = new javax.swing.JLabel();
-        potentialLabel = new javax.swing.JLabel();
+        categoryLabel = new javax.swing.JLabel();
+        categoryBox = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        potentialTextArea = new javax.swing.JTextArea();
-        closestLabel = new javax.swing.JLabel();
+        relatedLinks = new javax.swing.JTextArea();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("CSC 365 - Project #1");
+        setTitle("CSC 365 - Project #2");
         setAlwaysOnTop(true);
         setResizable(false);
 
@@ -59,17 +55,20 @@ public class GUI extends javax.swing.JFrame
 
         primaryTextBox.setHorizontalAlignment(javax.swing.JTextField.CENTER);
 
+        primaryLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        primaryLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         primaryLabel.setText("Primary web page");
 
-        potentialLabel.setText("Potential web page candidates");
+        categoryLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
+        categoryLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        categoryLabel.setText("Category:");
 
-        potentialTextArea.setColumns(20);
-        potentialTextArea.setRows(5);
-        jScrollPane1.setViewportView(potentialTextArea);
+        categoryBox.setFont(new java.awt.Font("Tahoma", 0, 14)); // NOI18N
+        categoryBox.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
 
-        closestLabel.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
-        closestLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        closestLabel.setText("Closest:");
+        relatedLinks.setColumns(20);
+        relatedLinks.setRows(5);
+        jScrollPane1.setViewportView(relatedLinks);
 
         javax.swing.GroupLayout mainPanelLayout = new javax.swing.GroupLayout(mainPanel);
         mainPanel.setLayout(mainPanelLayout);
@@ -78,39 +77,40 @@ public class GUI extends javax.swing.JFrame
             .addGroup(mainPanelLayout.createSequentialGroup()
                 .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addGap(168, 168, 168)
-                                .addComponent(primaryLabel))
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addGap(133, 133, 133)
-                                .addComponent(potentialLabel))
-                            .addGroup(mainPanelLayout.createSequentialGroup()
-                                .addGap(171, 171, 171)
-                                .addComponent(calculateButton)))
+                        .addGap(171, 171, 171)
+                        .addComponent(calculateButton)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(mainPanelLayout.createSequentialGroup()
-                        .addContainerGap()
+                        .addGap(10, 10, 10)
                         .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(closestLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(primaryTextBox))))
+                            .addComponent(primaryTextBox, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(primaryLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addGap(10, 10, 10))
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(categoryLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(categoryBox, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
+            .addGroup(mainPanelLayout.createSequentialGroup()
+                .addGap(20, 20, 20)
+                .addComponent(jScrollPane1)
                 .addContainerGap())
         );
         mainPanelLayout.setVerticalGroup(
             mainPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, mainPanelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(potentialLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 127, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(primaryLabel)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(primaryTextBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(27, 27, 27)
-                .addComponent(closestLabel)
-                .addGap(27, 27, 27)
+                .addGap(18, 18, 18)
+                .addComponent(categoryLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(categoryBox, javax.swing.GroupLayout.PREFERRED_SIZE, 19, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(calculateButton)
                 .addContainerGap())
         );
@@ -140,27 +140,17 @@ public class GUI extends javax.swing.JFrame
         );
 
         pack();
-    }
-	
-	public void addClosingListener()
-	{
-		addWindowListener(new WindowAdapter() 
-		{
-			  public void windowClosing(WindowEvent e) 
-			  {
-				  application.end();
-			  }
-		});
-	}
+    }// </editor-fold>   
+
 	
     private void calculateButtonActionPerformed(java.awt.event.ActionEvent evt) 
     {                                                
     	application.execute();
     }
     
-    public JTextArea getPotentialTextArea()
+    public JTextArea getRelatedLinks()
     {
-    	return potentialTextArea;
+    	return relatedLinks;
     }
     
     public JTextField getPrimaryTextBox()
@@ -168,19 +158,24 @@ public class GUI extends javax.swing.JFrame
     	return primaryTextBox;
     }
     
-    public JLabel getClosestLabel()
+    public JLabel getCategoryLabel()
     {
-    	return closestLabel;
+    	return categoryLabel;
+    }
+    
+    public JLabel getCategoryBox()
+    {
+    	return categoryBox;
     }
                    
     private javax.swing.JLabel authorLabel;
     private javax.swing.JButton calculateButton;
-    private javax.swing.JLabel closestLabel;
+    private javax.swing.JLabel categoryBox;
+    private javax.swing.JLabel categoryLabel;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPanel mainPanel;
-    private javax.swing.JLabel potentialLabel;
-    private javax.swing.JTextArea potentialTextArea;
     private javax.swing.JLabel primaryLabel;
     private javax.swing.JTextField primaryTextBox;
-    private javax.swing.JLabel titleLabel;            
+    private javax.swing.JTextArea relatedLinks;
+    private javax.swing.JLabel titleLabel;          
 }

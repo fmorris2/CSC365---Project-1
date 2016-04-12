@@ -1,6 +1,3 @@
-import java.util.HashSet;
-import java.util.Set;
-
 import data_structures.CustomHashTable;
 
 /*
@@ -40,6 +37,7 @@ public class FrequencyTable extends CustomHashTable<String, Word>
 		}
 	}
 	
+	/*
 	public static double calculateAngle(FrequencyTable one, FrequencyTable two)
 	{
 		double dotProduct = dotProduct(one, two);
@@ -77,6 +75,8 @@ public class FrequencyTable extends CustomHashTable<String, Word>
 	{
 		return Math.sqrt(dotProduct(this, this));
 	}
+	
+	*/
 	
 	private double calculateTfIdf(String word)
 	{

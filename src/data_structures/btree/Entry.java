@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 public class Entry implements Comparable<Entry>
 {
 	private static final int KEY_BLOCK_SIZE = 256; //256 bytes = 64 characters UTF-32
-	public static final int MAX_CHILDREN = 20;
+	public static final int MAX_CHILDREN = 10;
 	private static final int VALUE_BLOCK_SIZE = (MAX_CHILDREN * 256) + (MAX_CHILDREN * 8) + (MAX_CHILDREN * 4); //vals contain both URL and 8 byte double value for TF-IDF
 	public static final int TOTAL_BLOCK_SIZE = KEY_BLOCK_SIZE + VALUE_BLOCK_SIZE;
 	
